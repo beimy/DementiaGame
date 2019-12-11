@@ -64,9 +64,6 @@ public:
 
 	FString ActorName;
 
-	// How far ahead from the melee weapon can our Line Trace(s) reach.
-	float Reach = 30.0f;
-
 	// Used to point to our Input component, set to nullptr in case UInputComponent.h/.cpp loads up before.
 	USceneComponent* SceneComponent = nullptr;
 
@@ -98,8 +95,7 @@ public:
 
 	// Triggered when the collision hit event fires between our weapon and enemy entities
 	UFUNCTION()
-		void MeleeAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
+	void MeleeAttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	// Used to point to our Input component, set to nullptr in case UInputComponent.h/.cpp loads up before.
 	UInputComponent* InputComponent = nullptr;
 

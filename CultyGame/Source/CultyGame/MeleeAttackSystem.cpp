@@ -33,7 +33,8 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 	{
 		SwordBaseCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordBaseCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
-		SwordBaseCollisionBox->SetHiddenInGame(false);
+		SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
+		SwordBaseCollisionBox->SetHiddenInGame(false); 
 	}
 
 	SwordMidCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordMidCollisionBox"));
@@ -41,6 +42,7 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 	{
 		SwordMidCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordMidCollisionBox->SetCollisionProfileName("NoCollision"); /// When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
+		SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
 		SwordMidCollisionBox->SetHiddenInGame(false);
 	}
 
@@ -49,9 +51,39 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 	{
 		SwordTipCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordTipCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
-		SwordTipCollisionBox->SetHiddenInGame(false);
+		SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
+		SwordTipCollisionBox->SetHiddenInGame(false); 
 	}
 	/// The Punch - Part 2
+}
+
+// Called when the game starts
+void UMeleeAttackSystem::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetupInputComponent();
+	// No access to 'RootComponent' from 'SetupAttachment()', since RootComponent is found within 'CultyGameCharacter.h'. 
+	// We Cast to it, and get it's root component by '->GetRootComponent'
+	ACultyGameCharacter* CultyGameCharacter = Cast<ACultyGameCharacter>(GetOwner());
+
+	// After all of the work from the constructor is finished (where we setup collision boxes and their attachments)
+	// Take the box collisions and snap them onto our player character's weapon sockets
+	// Attach collision components to sockets based on transformations definitions
+	// Param1: Snap to target location, Param2: Snap to target rotation, Param3, Keep scaling of our object whatever we're attaching to that socket
+	// within the world's constraints Param4: False, do nothing with simulated bodies.
+	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+
+	SwordBaseCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordBase");
+	SwordMidCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordMid");
+	SwordTipCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordTip");
+
+	/// The Punch - Part3@630
+	// OnComponentHit event provided by ...CollisionBox, pass in myself ('this'), and make sure MeleeAttackHit is triggered on myself ('this') object.
+	SwordBaseCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	SwordTipCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	/// The Punch - Part3@630
 }
 
 void UMeleeAttackSystem::SetupInputComponent()
@@ -97,50 +129,16 @@ void UMeleeAttackSystem::MeleeAttackStart()
 
 	// Enable colliders when animation starts.
 	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
-	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true);
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
 	SwordMidCollisionBox->SetCollisionProfileName("Weapon");
-	SwordMidCollisionBox->SetNotifyRigidBodyCollision(true);
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
 	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
-	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true);
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 	/// The Punch - Part 2
 }
 /// The Punch - Part 1
-
-void UMeleeAttackSystem::MeleeAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	Log(ELogLevel::WARNING, __FUNCTION__);
-	Log(ELogLevel::WARNING, Hit.GetActor()->GetName());
-
-	TArray<AActor*> OverlappingActors;
-	SwordBaseCollisionBox->GetOverlappingActors(OUT OverlappingActors);
-	SwordMidCollisionBox->GetOverlappingActors(OUT OverlappingActors);
-	SwordTipCollisionBox->GetOverlappingActors(OUT OverlappingActors);
-
-	for (auto Actors : OverlappingActors)
-	{
-		if (Actors != nullptr)
-		{
-			USceneComponent* Actor = Actors->FindComponentByClass<USceneComponent>();
-			ECollisionResponse Enemy = Actor->GetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1);
-
-			UE_LOG(LogTemp, Warning, TEXT("Actor from overlapping actors"));
-
-			if (Enemy)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Should be destorying"));
-
-				//PlayerCharacter = GetWorld()->GetFirstPlayerController()->GetPawn();
-				// UNPC* NPCCharacter = Cast<UNPC>(GetOwner());
-				//NPCCharacter->getcon
-				//AController* NPCController = NPCCharacter->get
-				//Actors->TakeDamage(49.0, NPCCharacter->Melee, NPCCharacter, PlayerCharacter);
-				Actors->Destroy();
-			}
-		}
-	}
-}
 
 /// The Punch - Part 1
 void UMeleeAttackSystem::MeleeAttackEnd()
@@ -150,39 +148,25 @@ void UMeleeAttackSystem::MeleeAttackEnd()
 	/// The Punch - Part 2
 	// Disable colliders when animation ends.
 	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision");
-	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false);
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
 
-	SwordMidCollisionBox->SetCollisionProfileName("NoCollision");
-	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false);
+	SwordMidCollisionBox->SetCollisionProfileName("NoCollision"); 
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
 
 	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
-	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false);
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
 	/// The Punch - Part 2
 }
 /// The Punch - Part 1
 
-// Called when the game starts
-void UMeleeAttackSystem::BeginPlay()
+/// The Punch - Part 3
+void UMeleeAttackSystem::MeleeAttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::BeginPlay();
-
-	SetupInputComponent();
-	// No access to 'RootComponent' from 'SetupAttachment()', since RootComponent is found within 'CultyGameCharacter.h'. 
-	// We Cast to it, and get it's root component by '->GetRootComponent'
-	ACultyGameCharacter* CultyGameCharacter = Cast<ACultyGameCharacter>(GetOwner());
-
-	// After all of the work from the constructor is finished (where we setup collision boxes and their attachments)
-	// Take the box collisions and snap them onto our player character's weapon sockets
-	// Attach collision components to sockets based on transformations definitions
-	// Param1: Snap to target location, Param2: Snap to target rotation, Param3, Keep scaling of our object whatever we're attaching to that socket
-	// within the world's constraints Param4: False, do nothing with simulated bodies.
-	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
-
-	SwordBaseCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordBase");
-	SwordMidCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordMid");
-	SwordTipCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordTip");
-
+	Log(ELogLevel::INFO, __FUNCTION__);
+	Log(ELogLevel::INFO, Hit.GetActor()->GetName());
+	UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
 }
+/// The Punch - Part 3
 
 // Called every frame
 void UMeleeAttackSystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

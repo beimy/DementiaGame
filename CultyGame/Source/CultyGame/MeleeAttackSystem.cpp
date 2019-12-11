@@ -2,6 +2,7 @@
 
 #include "MeleeAttackSystem.h"
 #include "CultyGameCharacter.h"
+// #include "NPC.h"
 
 #define OUT
 
@@ -24,7 +25,7 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 	/// The Punch - Part 2
 	// No access to 'RootComponent' from 'SetupAttachment()', since RootComponent is found within 'CultyGameCharacter.h'. 
 	// We Cast to it, and get it's root component by '->GetRootComponent'
-	
+
 	ACultyGameCharacter* CultyGameCharacter = Cast<ACultyGameCharacter>(GetOwner());
 
 	SwordBaseCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordBaseCollisionBox"));
@@ -72,106 +73,6 @@ void UMeleeAttackSystem::SetupInputComponent()
 	}
 }
 
-FVector UMeleeAttackSystem::GetLineTraceStart()
-{
-	SceneComponent = GetWorld()->GetFirstPlayerController()->GetPawn()->FindComponentByClass<USceneComponent>();
-
-	FVector PlayerWeaponLocation = SceneComponent->GetSocketLocation(FName("SwordBase"));
-	FRotator PlayerWeaponRotation = SceneComponent->GetSocketRotation(FName("SwordTip"));
-
-	return PlayerWeaponLocation;
-}
-
-FVector UMeleeAttackSystem::GetLineTraceEnd()
-{
-	SceneComponent = GetWorld()->GetFirstPlayerController()->GetPawn()->FindComponentByClass<USceneComponent>();
-
-	FVector PlayerWeaponLocation = SceneComponent->GetSocketLocation(FName("SwordBase"));
-	FVector PlayerWeaponRotation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector(); 
- // FVector PlayerWeaponRotation = SceneComponent->GetSocketLocation(FName("SwordTip"));
-
-	return PlayerWeaponLocation + PlayerWeaponRotation * Reach;
-}
-
-// Line Trace itself
-const TArray<FHitResult> UMeleeAttackSystem::GetFirstEnemyHit()
-{	
-	/// Line Trace (AKA Ray-cast) out to Reach distance
-	TArray<FHitResult> HitResults; // Store all actors hit in an array.
-	FHitResult HitActor(ForceInit);
-
-	/// Setup query parameters for Line Trace
-	FCollisionObjectQueryParams TraceObjectInterest(ECollisionChannel::ECC_GameTraceChannel1); // Collision types we're interested in.
-	FCollisionQueryParams TraceParameters = FCollisionQueryParams(FName(TEXT("")), false, GetOwner());
-
-	bool IsHit = GetWorld()->LineTraceMultiByObjectType(
-		OUT HitResults,
-		GetLineTraceStart(),
-		GetLineTraceEnd(),
-		TraceObjectInterest,
-		TraceParameters
-	);
-
-	if (IsHit != false)
-	{
-		/// Iterate through HitResults, check if we Hit an enemy
-		for (auto& Hit : HitResults)
-		{
-			if (GEngine != nullptr)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit Result: %s"), *Hit.Actor->GetName()));
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("All Hit Information: %s"), *Hit.ToString()));
-			}
-			HitActor = Hit;
-		}
-
-		/*
-		UPrimitiveComponent* EnemyToPush = Hit.GetComponent();
-
-		if (HitData.GetActor() != nullptr) // ((HitData.GetActor() != nullptr) && (HitData.GetActor() != GetOwner()) && (EnemyToPush != nullptr))
-		{
-			const float ForceAmount = 20000.0f;
-			EnemyToPush->AddForce(FVector(0.0f, 0.0f, ForceAmount));
-		}
-		*/
-	}
-	return HitResults;
-}
-
-void UMeleeAttackSystem::MeleeAttack()
-{
-	GetFirstEnemyHit();
-
-	// DrawDebugLine(GetWorld(), GetLineTraceStart(), GetLineTraceEnd(), FColor(255, 0, 0), false, 2.0f, 0.0f, 1.5f);
-
-	/// Get Socket locations
-	FVector curBase = SceneComponent->GetSocketLocation(FName("SwordBase"));
-	FVector curTip = SceneComponent->GetSocketLocation(FName("SwordTip"));
-
-	/// Store previous Socket locations
-	FVector prevBase = curBase;
-	FVector prevTip = curTip;
-
-	/// Store current & previous length between Sockets for Line Trace
-	float curLength = (curBase - curTip).Size();
-	float prevLength = (prevBase - prevTip).Size();
-
-	const int sub = 32;
-	for (int i = 1; i < sub; i++)
-	{
-		FVector tmpBase = FMath::Lerp(curBase, prevBase, i / float(sub));
-		FVector tmpTip = FMath::Lerp(curTip, prevTip, i / float(sub));
-		FVector tmpOff = (tmpTip - tmpBase);
-		tmpOff.Normalize();
-		DrawDebugLine(GetWorld(), tmpBase, tmpBase + tmpOff * FMath::Lerp(curLength, prevLength, i / float(sub)), FColor::Red, false, 2.0f, 0.0f, 1.5f);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Test")));
-	}
-	DrawDebugLine(GetWorld(), curBase, curTip, FColor::Green, false, 2.0f, 0.0f, 1.5f);
-	// DrawDebugLine(GetWorld(), curBase, curTip, FColor::Green, false, 1 / 15.0f * 2);
-
-	return;
-}
-
 /// The Punch - Part 2
 void UMeleeAttackSystem::MeleeAttackInput()
 {
@@ -196,11 +97,50 @@ void UMeleeAttackSystem::MeleeAttackStart()
 
 	// Enable colliders when animation starts.
 	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true);
+
 	SwordMidCollisionBox->SetCollisionProfileName("Weapon");
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(true);
+
 	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true);
 	/// The Punch - Part 2
 }
 /// The Punch - Part 1
+
+void UMeleeAttackSystem::MeleeAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Log(ELogLevel::WARNING, __FUNCTION__);
+	Log(ELogLevel::WARNING, Hit.GetActor()->GetName());
+
+	TArray<AActor*> OverlappingActors;
+	SwordBaseCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+	SwordMidCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+	SwordTipCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+
+	for (auto Actors : OverlappingActors)
+	{
+		if (Actors != nullptr)
+		{
+			USceneComponent* Actor = Actors->FindComponentByClass<USceneComponent>();
+			ECollisionResponse Enemy = Actor->GetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1);
+
+			UE_LOG(LogTemp, Warning, TEXT("Actor from overlapping actors"));
+
+			if (Enemy)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Should be destorying"));
+
+				//PlayerCharacter = GetWorld()->GetFirstPlayerController()->GetPawn();
+				// UNPC* NPCCharacter = Cast<UNPC>(GetOwner());
+				//NPCCharacter->getcon
+				//AController* NPCController = NPCCharacter->get
+				//Actors->TakeDamage(49.0, NPCCharacter->Melee, NPCCharacter, PlayerCharacter);
+				Actors->Destroy();
+			}
+		}
+	}
+}
 
 /// The Punch - Part 1
 void UMeleeAttackSystem::MeleeAttackEnd()
@@ -210,8 +150,13 @@ void UMeleeAttackSystem::MeleeAttackEnd()
 	/// The Punch - Part 2
 	// Disable colliders when animation ends.
 	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false);
+
 	SwordMidCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false);
+
 	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false);
 	/// The Punch - Part 2
 }
 /// The Punch - Part 1
@@ -232,10 +177,11 @@ void UMeleeAttackSystem::BeginPlay()
 	// Param1: Snap to target location, Param2: Snap to target rotation, Param3, Keep scaling of our object whatever we're attaching to that socket
 	// within the world's constraints Param4: False, do nothing with simulated bodies.
 	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
-		
+
 	SwordBaseCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordBase");
 	SwordMidCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordMid");
 	SwordTipCollisionBox->AttachToComponent(CultyGameCharacter->GetMesh(), AttachmentRules, "SwordTip");
+
 }
 
 // Called every frame
@@ -243,11 +189,6 @@ void UMeleeAttackSystem::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// If actor melee's
-		// MeleeAttack();
-			// LastTimeMeleePressed = GetWorld()->GetTimeSeconds();
-	// If (GetWorld()->GetTimeSeconds() - LastTimeMeleePressed >= MeleeDelay)
-	
 }
 
 void UMeleeAttackSystem::Log(ELogLevel LogLevel, FString Message)

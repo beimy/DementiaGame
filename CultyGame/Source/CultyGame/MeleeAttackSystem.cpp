@@ -34,7 +34,7 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 		SwordBaseCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordBaseCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
 		SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
-		SwordBaseCollisionBox->SetHiddenInGame(false); 
+		SwordBaseCollisionBox->SetHiddenInGame(true); 
 	}
 
 	SwordMidCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordMidCollisionBox"));
@@ -43,7 +43,7 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 		SwordMidCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordMidCollisionBox->SetCollisionProfileName("NoCollision"); /// When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
 		SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
-		SwordMidCollisionBox->SetHiddenInGame(false);
+		SwordMidCollisionBox->SetHiddenInGame(true);
 	}
 
 	SwordTipCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordTipCollisionBox"));
@@ -52,7 +52,7 @@ UMeleeAttackSystem::UMeleeAttackSystem()
 		SwordTipCollisionBox->SetupAttachment(CultyGameCharacter->GetRootComponent());
 		SwordTipCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
 		SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
-		SwordTipCollisionBox->SetHiddenInGame(false); 
+		SwordTipCollisionBox->SetHiddenInGame(true);
 	}
 	/// The Punch - Part 2
 }

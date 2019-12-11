@@ -16,8 +16,7 @@
 #include "MeleeAttackSystem.generated.h"
 
 UENUM(BlueprintType)
-enum class ELogLevel : uint8
-{
+enum class ELogLevel : uint8 {
 	TRACE			UMETA(DisplayName = "Trace"),
 	DEBUG			UMETA(DisplayName = "Debug"),
 	INFO			UMETA(DisplayName = "Info"),
@@ -26,16 +25,14 @@ enum class ELogLevel : uint8
 };
 
 UENUM(BlueprintType)
-enum class ELogOutput : uint8 // Where the log messages will go.
-{
+enum class ELogOutput : uint8 {
 	ALL				UMETA(DisplayName = "All levels"),
 	OUTPUT_LOG		UMETA(DisplayName = "Output log"),
 	SCREEN			UMETA(DisplayName = "Screen")
 };
 
 UENUM(BlueprintType)
-enum class EAttackType : uint8
-{
+enum class EAttackType : uint8 {
 	MELEE_SWORD		UMETA(DisplayName = "Melee - Sword")
 };
 
@@ -50,11 +47,9 @@ public:
 	// Sets default values for this component's properties
 	UMeleeAttackSystem();
 
-protected:
 	// Called when the game starts, or when the player is spawned
 	virtual void BeginPlay() override;
 
-public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -66,11 +61,6 @@ public:
 
 	// Used to point to our Input component, set to nullptr in case UInputComponent.h/.cpp loads up before.
 	USceneComponent* SceneComponent = nullptr;
-
-	// USkeletalMeshComponent* OwnerMeshComponent = nullptr;
-
-	// Play animation & deal damage 
-	void MeleeAttack();
 
 	/// The Punch - Part 1
 	// Melee Attack Montage Animation
@@ -86,6 +76,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true")) // Allows us to bind our properties to a Blueprint
 		UBoxComponent* SwordTipCollisionBox;
+	
 	void MeleeAttackInput(); // Triggers attack animations based on user input
 	/// The Punch - Part 2
 	void MeleeAttackStart(); // Initiates player attack
@@ -96,6 +87,7 @@ public:
 	// Triggered when the collision hit event fires between our weapon and enemy entities
 	UFUNCTION()
 	void MeleeAttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
 	// Used to point to our Input component, set to nullptr in case UInputComponent.h/.cpp loads up before.
 	UInputComponent* InputComponent = nullptr;
 

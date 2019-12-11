@@ -80,9 +80,9 @@ void UMeleeAttackSystem::BeginPlay()
 
 	/// The Punch - Part3@630
 	// OnComponentHit event provided by ...CollisionBox, pass in myself ('this'), and make sure MeleeAttackHit is triggered on myself ('this') object.
-	SwordBaseCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
-	SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
-	SwordTipCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	SwordBaseCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit); 
+	SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit); 
+	SwordTipCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit); 
 	/// The Punch - Part3@630
 }
 
@@ -163,8 +163,11 @@ void UMeleeAttackSystem::MeleeAttackEnd()
 void UMeleeAttackSystem::MeleeAttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Log(ELogLevel::INFO, __FUNCTION__);
+
 	Log(ELogLevel::INFO, Hit.GetActor()->GetName());
+
 	UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
+	GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, __FUNCTION__);
 }
 /// The Punch - Part 3
 

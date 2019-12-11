@@ -16,7 +16,7 @@ void UAttackStartNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAni
 		UMeleeAttackSystem* MeleeAttackSystemComponent = Cast<UMeleeAttackSystem>(MeshComp->GetOwner());
 		if (MeleeAttackSystemComponent != NULL)
 		{
-			MeleeAttackSystemComponent->MeleeAttackStart();
+			//MeleeAttackSystemComponent->MeleeAttackStart();
 		}
 	}
 }
@@ -30,7 +30,7 @@ void UAttackStartNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 		UMeleeAttackSystem* MeleeAttackSystemComponent = Cast<UMeleeAttackSystem>(MeshComp->GetOwner());
 		if (MeleeAttackSystemComponent != NULL)
 		{
-			MeleeAttackSystemComponent->MeleeAttackEnd();
+			//MeleeAttackSystemComponent->MeleeAttackEnd();
 		}
 	}
 }

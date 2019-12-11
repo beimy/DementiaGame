@@ -25,7 +25,7 @@ enum class ELogLevel : uint8
 	ERROR			UMETA(DisplayName = "Error")
 };
 
-UENUM(BlueprintType) 
+UENUM(BlueprintType)
 enum class ELogOutput : uint8 // Where the log messages will go.
 {
 	ALL				UMETA(DisplayName = "All levels"),
@@ -72,16 +72,6 @@ public:
 
 	// USkeletalMeshComponent* OwnerMeshComponent = nullptr;
 
-	// Get the start of our weapon's line trace.
-	FVector GetLineTraceStart();
-
-	// Get the end of our weapon's line trace.
-	FVector GetLineTraceEnd();
-
-	// Line Trace, return the first enemy that's hit.
-	const TArray<FHitResult> GetFirstEnemyHit();
-	// const FHitResult GetFirstEnemyHit();
-
 	// Play animation & deal damage 
 	void MeleeAttack();
 
@@ -104,6 +94,11 @@ public:
 	void MeleeAttackStart(); // Initiates player attack
 	void MeleeAttackEnd(); // Stops player attack
 	/// The Punch - Part 1
+
+
+	// Triggered when the collision hit event fires between our weapon and enemy entities
+	UFUNCTION()
+		void MeleeAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	// Used to point to our Input component, set to nullptr in case UInputComponent.h/.cpp loads up before.
 	UInputComponent* InputComponent = nullptr;

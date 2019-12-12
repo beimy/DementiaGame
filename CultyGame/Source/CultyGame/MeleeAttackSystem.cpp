@@ -108,7 +108,7 @@ void UMeleeAttackSystem::SetupInputComponent()
 /// The Punch - Part 2
 void UMeleeAttackSystem::MeleeAttackInput()
 {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 
 	// generate a random number between 1 and 3
 	int MontageSectionIndex = rand() % 3 + 1;
@@ -125,7 +125,7 @@ void UMeleeAttackSystem::MeleeAttackInput()
 void UMeleeAttackSystem::MeleeAttackStart()
 {
 	/// The Punch - Part 2
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 
 	// Enable colliders when animation starts.
 	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
@@ -143,7 +143,7 @@ void UMeleeAttackSystem::MeleeAttackStart()
 /// The Punch - Part 1
 void UMeleeAttackSystem::MeleeAttackEnd()
 {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 
 	/// The Punch - Part 2
 	// Disable colliders when animation ends.
@@ -162,11 +162,11 @@ void UMeleeAttackSystem::MeleeAttackEnd()
 /// The Punch - Part 3
 void UMeleeAttackSystem::MeleeAttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 
-	Log(ELogLevel::INFO, Hit.GetActor()->GetName());
+	//Log(ELogLevel::INFO, Hit.GetActor()->GetName());
 
-	UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
+	//UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
 	GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, __FUNCTION__);
 }
 /// The Punch - Part 3

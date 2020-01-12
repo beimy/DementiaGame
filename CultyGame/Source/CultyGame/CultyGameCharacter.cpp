@@ -4,10 +4,11 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+
+#include "Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ACultyGameCharacter
@@ -46,6 +47,14 @@ ACultyGameCharacter::ACultyGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+	
+	// Load our animation montage on runtime
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeSwordAttackMontageObject(TEXT("AnimMontage'/Game/Mannequin/Montages/MeleeSwordAttackMontage2.MeleeSwordAttackMontage2'"));
+	if (MeleeSwordAttackMontageObject.Succeeded()) // Null check
+	{
+		MeleeSwordAttackMontage = MeleeSwordAttackMontageObject.Object; // Retrieve the montage from the container object, i.e. get me the object of this thing I just loaded.
+		UE_LOG(LogTemp, VeryVerbose, TEXT("Animation Montage has been loaded successfully."));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,6 +84,11 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ACultyGameCharacter::OnResetVR);
+
+	/// The Punch - Part 1
+	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackStart); /// The Punch - Part 2, changed from MeleeAttackStart to MeleeAttackInput.
+	PlayerInputComponent->BindAction("MeleeAttack", IE_Released, this, &ACultyGameCharacter::AttackEnd);
+	/// The Punch - Part 1
 }
 
 void ACultyGameCharacter::OnResetVR()
@@ -130,5 +144,87 @@ void ACultyGameCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void ACultyGameCharacter::AttackStart()
+{
+	Log(ELogLevel::INFO, __FUNCTION__);
+
+	// generate a random number between 1 and 3
+	int MontageSectionIndex = rand() % 3 + 1;
+
+	// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
+	FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+
+	PlayAnimMontage(MeleeSwordAttackMontage, 1.f, FName(*MontageSection));
+}
+
+void ACultyGameCharacter::AttackEnd()
+{
+	Log(ELogLevel::INFO, __FUNCTION__);
+}
+
+void ACultyGameCharacter::Log(ELogLevel LogLevel, FString Message)
+{
+	Log(LogLevel, Message, ELogOutput::ALL);
+}
+
+void ACultyGameCharacter::Log(ELogLevel LogLevel, FString Message, ELogOutput LogOutput)
+{
+	// only print when screen is selected and the GEngine object is available
+	if ((LogOutput == ELogOutput::ALL || LogOutput == ELogOutput::SCREEN) && GEngine)
+	{
+		// default color
+		FColor LogColor = FColor::Cyan;
+		// flip the color based on the type
+		switch (LogLevel)
+		{
+		case ELogLevel::TRACE:
+			LogColor = FColor::Green;
+			break;
+		case ELogLevel::DEBUG:
+			LogColor = FColor::Cyan;
+			break;
+		case ELogLevel::INFO:
+			LogColor = FColor::White;
+			break;
+		case ELogLevel::WARNING:
+			LogColor = FColor::Yellow;
+			break;
+		case ELogLevel::ERROR:
+			LogColor = FColor::Red;
+			break;
+		default:
+			break;
+		}
+		// print the message and leave it on screen ( 4.5f controls the duration )
+		GEngine->AddOnScreenDebugMessage(-1, 4.5f, LogColor, Message);
+	}
+
+	if (LogOutput == ELogOutput::ALL || LogOutput == ELogOutput::OUTPUT_LOG)
+	{
+		// flip the message type based on error level
+		switch (LogLevel)
+		{
+		case ELogLevel::TRACE:
+			UE_LOG(LogTemp, VeryVerbose, TEXT("%s"), *Message);
+			break;
+		case ELogLevel::DEBUG:
+			UE_LOG(LogTemp, Verbose, TEXT("%s"), *Message);
+			break;
+		case ELogLevel::INFO:
+			UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
+			break;
+		case ELogLevel::WARNING:
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
+			break;
+		case ELogLevel::ERROR:
+			UE_LOG(LogTemp, Error, TEXT("%s"), *Message);
+			break;
+		default:
+			UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
+			break;
+		}
 	}
 }

@@ -14,6 +14,3 @@ class ACultyGameGameMode : public AGameModeBase
 public:
 	ACultyGameGameMode();
 };
-
-
-

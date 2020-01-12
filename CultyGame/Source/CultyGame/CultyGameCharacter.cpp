@@ -55,6 +55,45 @@ ACultyGameCharacter::ACultyGameCharacter()
 		MeleeSwordAttackMontage = MeleeSwordAttackMontageObject.Object; // Retrieve the montage from the container object, i.e. get me the object of this thing I just loaded.
 		UE_LOG(LogTemp, VeryVerbose, TEXT("Animation Montage has been loaded successfully."));
 	}
+
+	SwordBaseCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordBaseCollisionBox"));
+	SwordBaseCollisionBox->SetupAttachment(RootComponent);
+	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
+	SwordBaseCollisionBox->SetHiddenInGame(false);
+
+	SwordMidCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordMidCollisionBox"));
+	SwordMidCollisionBox->SetupAttachment(RootComponent);
+	SwordMidCollisionBox->SetCollisionProfileName("NoCollision"); /// When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
+	SwordMidCollisionBox->SetHiddenInGame(false);
+
+	SwordTipCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordTipCollisionBox"));
+	SwordTipCollisionBox->SetupAttachment(RootComponent);
+	SwordTipCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Hit Generation turned off.
+	SwordTipCollisionBox->SetHiddenInGame(false);
+}
+
+void ACultyGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// After all of the work from the constructor is finished (where we setup collision boxes and their attachments)
+	// Take the box collisions and snap them onto our player character's weapon sockets
+	// Attach collision components to sockets based on transformations definitions
+	// Param1: Snap to target location, Param2: Snap to target rotation, Param3, Keep scaling of our object whatever we're attaching to that socket
+	// within the world's constraints Param4: False, do nothing with simulated bodies.
+	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+
+	SwordBaseCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordBase");
+	SwordMidCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordMid");
+	SwordTipCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordTip");
+
+	// OnComponentHit event provided by ...CollisionBox, pass in myself ('this'), and make sure MeleeAttackHit is triggered on myself ('this') object.
+	// SwordBaseCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	// SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	// SwordTipCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,10 +124,8 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ACultyGameCharacter::OnResetVR);
 
-	/// The Punch - Part 1
-	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackStart); /// The Punch - Part 2, changed from MeleeAttackStart to MeleeAttackInput.
+	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackInput); 
 	PlayerInputComponent->BindAction("MeleeAttack", IE_Released, this, &ACultyGameCharacter::AttackEnd);
-	/// The Punch - Part 1
 }
 
 void ACultyGameCharacter::OnResetVR()
@@ -147,7 +184,7 @@ void ACultyGameCharacter::MoveRight(float Value)
 	}
 }
 
-void ACultyGameCharacter::AttackStart()
+void ACultyGameCharacter::AttackInput()
 {
 	Log(ELogLevel::INFO, __FUNCTION__);
 
@@ -160,10 +197,49 @@ void ACultyGameCharacter::AttackStart()
 	PlayAnimMontage(MeleeSwordAttackMontage, 1.f, FName(*MontageSection));
 }
 
+void ACultyGameCharacter::AttackStart()
+{	
+	Log(ELogLevel::INFO, __FUNCTION__);
+
+	// Enable colliders when animation starts.
+	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+
+	SwordMidCollisionBox->SetCollisionProfileName("Weapon");
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+
+	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+}
+
 void ACultyGameCharacter::AttackEnd()
 {
 	Log(ELogLevel::INFO, __FUNCTION__);
+
+	// Disable colliders when animation ends.
+	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+
+	SwordMidCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+
+	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
+	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
 }
+
+/// The Punch - Part 3
+/*
+void ACultyGameCharacter::AttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//Log(ELogLevel::INFO, __FUNCTION__);
+
+	//Log(ELogLevel::INFO, Hit.GetActor()->GetName());
+
+	//UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
+	GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, __FUNCTION__);
+}
+*/
+/// The Punch - Part 3
 
 void ACultyGameCharacter::Log(ELogLevel LogLevel, FString Message)
 {

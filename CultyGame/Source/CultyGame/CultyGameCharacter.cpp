@@ -1,6 +1,8 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "CultyGameCharacter.h"
+#include "Interactable.h" // Inventory
+#include "GameplayController.h" // Inventory
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -182,6 +184,35 @@ void ACultyGameCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+// Inventory
+void ACultyGameCharacter::CheckForInteractables() // Check for interactable times through a ray cast every tick
+{
+
+	FHitResult HitResult;
+
+	FVector StartTrace = FollowCamera->GetComponentLocation();
+	FVector EndTrace = (FollowCamera->GetForwardVector() * 300) + StartTrace;
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Ignore ourselves.
+
+	AGameplayController* Controller = Cast<AGameplayController>(GetController()); // Get our player's controller.
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, QueryParams) && Controller) // NULL check line trace and player controller
+	{
+		// Check if the item we hit was an interactable item
+		if (AInteractable * Interactable = Cast<AInteractable>(HitResult.GetActor())) // Check if actor hit is an interactable, if so...
+		{
+			Controller->CurrentInteractable = Interactable; // ...set current interactable to interactable.
+			return;
+		}
+	}
+
+	// If we didn't hit anything, or the actor we hit was not an interactable, set the current interactable to nullptr
+	Controller->CurrentInteractable = nullptr;
+
 }
 
 void ACultyGameCharacter::AttackInput()

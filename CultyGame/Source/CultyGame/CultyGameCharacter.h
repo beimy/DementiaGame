@@ -6,6 +6,7 @@
 #include "UObject/Class.h"
 #include "Engine.h"
 #include "Engine/World.h"
+#include "Engine/Datatable.h" // Inventory
 #include "Components/BoxComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/ActorComponent.h"
@@ -14,6 +15,106 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
 #include "CultyGameCharacter.generated.h"
+
+
+/*
+	Stores all valid craft combinations, what items can we craft.
+ 
+*/
+USTRUCT(BlueprintType) 
+struct FCraftingInfo : public FTableRowBase // Inventory
+{
+
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item that we need to use to create something.
+	FName ComponentID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item created from components.
+	FName ProductID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item used to create something, thus destroy it after creation.
+	bool bDestroyComponentA;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item used to create something, thus destroy it after creation.
+	bool bDestroyComponentB; 
+};
+
+
+/*
+	Items are made of structs
+	Inherits from FTableRowBase, because we want to use this in a data table.
+	There are 2 types of items:
+	1. Pickups: When picked up, it's destroyed, and adds one of these FInventoryItem(s) to inventory.
+	2. 
+*/
+USTRUCT(BlueprintType) 
+struct FInventoryItem : public FTableRowBase // Inventory
+{
+
+	GENERATED_BODY()
+
+public: 
+
+	FInventoryItem()
+	{
+		Name = FText::FromString("Item");
+		Action = FText::FromString("Use");
+		Description = FText::FromString("Please enter a description for this item");
+		Value = 10;
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ItemID;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class APickup> ItemPickup; // Pickup, if you pick up an item, but then you drop it, we'll need to spawn it back into the world.
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Value;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* Thumbnail;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Stores all valid craft combinations for this item.
+	TArray<FCraftingInfo> CraftingCombinations;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanBeUsed;
+
+	/*
+		Overloading '==' operator.
+		By default we can't compare 2 inventory items, since C++ doesn't know how to compare inventory items.
+		e.g.
+		if(ItemA == ItemB) 
+		So we're instructing C++ how to compare inventory items.
+		We need this because when we're removing from an inventory, and Unreal requires that we overload that data, otherwise the array cannot remove.
+		Whenever we wish to remove an item from the player's inventory we cannot unless we do this.
+	*/
+	bool operator==(const FInventoryItem& Item) const
+	{
+		if (ItemID == Item.ItemID)
+		{
+			return true;
+		}
+			
+		else
+		{
+			return false;
+		}
+	}
+};
 
 
 UENUM(BlueprintType)
@@ -114,6 +215,8 @@ protected:
 
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
+
+	void CheckForInteractables(); // Inventory
 
 protected:
 	// APawn interface

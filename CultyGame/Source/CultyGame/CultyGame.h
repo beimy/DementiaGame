@@ -2,4 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#ifndef __CultyGame__
+#define __CultyGame__
+
+#include "Engine.h"
+
+#define COLLISION_INTERACTABLE ECC_GameTraceChannel3;
+
+#endif

@@ -17,6 +17,7 @@ class CULTYGAME_API AGameplayController : public APlayerController
 public:
 
 	// The interactable that the player is currently looking at. This will be equal to nullptr if the player is not looking at something that is interactable.
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class AInteractable* CurrentInteractable;
 	
 };

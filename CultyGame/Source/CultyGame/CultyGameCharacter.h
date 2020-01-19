@@ -168,6 +168,8 @@ class ACultyGameCharacter : public ACharacter
 public:
 	ACultyGameCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	// Called when the game starts, or when the player is spawned
 	virtual void BeginPlay() override;
 

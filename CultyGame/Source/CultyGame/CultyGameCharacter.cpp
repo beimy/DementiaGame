@@ -130,6 +130,15 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAction("MeleeAttack", IE_Released, this, &ACultyGameCharacter::AttackEnd);
 }
 
+void ACultyGameCharacter::Tick(float DeltaTime)
+{
+
+	Super::Tick(DeltaTime);
+
+	CheckForInteractables();
+
+}
+
 void ACultyGameCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -193,12 +202,14 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 	FHitResult HitResult;
 
 	FVector StartTrace = FollowCamera->GetComponentLocation();
-	FVector EndTrace = (FollowCamera->GetForwardVector() * 300) + StartTrace;
+	FVector EndTrace = (FollowCamera->GetForwardVector() * 600) + StartTrace;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this); // Ignore ourselves.
 
 	AGameplayController* Controller = Cast<AGameplayController>(GetController()); // Get our player's controller.
+
+	if (!Controller) { return; }
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, QueryParams) && Controller) // NULL check line trace and player controller
 	{

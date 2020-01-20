@@ -128,6 +128,9 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackInput); 
 	PlayerInputComponent->BindAction("MeleeAttack", IE_Released, this, &ACultyGameCharacter::AttackEnd);
+
+	// Interact input is setup within 'GameplayController'
+	// Open Inventory input is setup within 'BP_GameplayController' Blueprint.
 }
 
 void ACultyGameCharacter::Tick(float DeltaTime)
@@ -202,14 +205,14 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 	FHitResult HitResult;
 
 	FVector StartTrace = FollowCamera->GetComponentLocation();
-	FVector EndTrace = (FollowCamera->GetForwardVector() * 600) + StartTrace;
+	FVector EndTrace = (FollowCamera->GetForwardVector() * 550.f) + StartTrace;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this); // Ignore ourselves.
 
 	AGameplayController* Controller = Cast<AGameplayController>(GetController()); // Get our player's controller.
 
-	if (!Controller) { return; }
+	if (!Controller) { return; } // NULL check
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, QueryParams) && Controller) // NULL check line trace and player controller
 	{

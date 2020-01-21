@@ -82,13 +82,16 @@ public:
 	int32 Value;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Scale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Thumbnail;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Stores all valid craft combinations for this item.
-	TArray<FCraftingInfo> CraftingCombinations;
+	TArray<FCraftingInfo> CraftCombinations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanBeUsed;

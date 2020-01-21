@@ -18,8 +18,16 @@ class CULTYGAME_API AGameplayController : public APlayerController
 
 public:
 
+	// Reloads the players inventory - call this when you've made changes to the player's inventory,
+	// and want them to see the changes
+	UFUNCTION(BlueprintImplementableEvent)
+	void ReloadInventory();
+
 	UFUNCTION(BlueprintCallable, Category = "Utility")
 	void AddItemToInventoryByID(FName ID);
+
+	UFUNCTION(BlueprintCallable, Category = "Utility")
+	void CraftItem(FInventoryItem ItemA, FInventoryItem ItemB, AGameplayController* Controller);
 
 	// The interactable that the player is currently looking at. This will be equal to nullptr if the player is not looking at something that is interactable.
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)

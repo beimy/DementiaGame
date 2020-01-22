@@ -14,4 +14,22 @@ class CULTYGAME_API APickup : public AInteractable
 {
 	GENERATED_BODY()
 	
+public:
+
+	APickup();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Pickup")
+	void OnUsed();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Pickup")
+	void Drop();
+
+protected:
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* PickupMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ItemID;
+
 };

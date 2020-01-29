@@ -231,7 +231,7 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 
 void ACultyGameCharacter::AttackInput()
 {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	// Log(ELogLevel::INFO, __FUNCTION__);
 
 	// generate a random number between 1 and 3
 	int MontageSectionIndex = rand() % 3 + 1;
@@ -244,7 +244,7 @@ void ACultyGameCharacter::AttackInput()
 
 void ACultyGameCharacter::AttackStart()
 {	
-	Log(ELogLevel::INFO, __FUNCTION__);
+	// Log(ELogLevel::INFO, __FUNCTION__);
 
 	// Enable colliders when animation starts.
 	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
@@ -259,7 +259,7 @@ void ACultyGameCharacter::AttackStart()
 
 void ACultyGameCharacter::AttackEnd()
 {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	// Log(ELogLevel::INFO, __FUNCTION__);
 
 	// Disable colliders when animation ends.
 	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision");

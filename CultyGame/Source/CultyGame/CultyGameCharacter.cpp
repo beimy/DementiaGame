@@ -12,6 +12,8 @@
 
 #include "Engine.h"
 
+#define OUT
+
 //////////////////////////////////////////////////////////////////////////
 // ACultyGameCharacter
 
@@ -255,6 +257,8 @@ void ACultyGameCharacter::AttackStart()
 
 	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
 	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+
+	InflictDamage();
 }
 
 void ACultyGameCharacter::AttackEnd()
@@ -270,6 +274,45 @@ void ACultyGameCharacter::AttackEnd()
 
 	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
 	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+}
+
+void ACultyGameCharacter::InflictDamage()
+{
+	// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Inflict damage function has been called.")));
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController != nullptr)
+	{
+		// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Player controller isn't null.")));
+		// Find all the overlapping actors
+		TArray<AActor*> OverlappingActors;
+
+		//TArray<AActor*> HitActors;
+
+		// SwordBaseCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+		SwordMidCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+		//SwordTipCollisionBox->GetOverlappingActors(OUT OverlappingActors);
+
+		if (SwordMidCollisionBox == nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Inflict Damage null check")));
+			return;
+		}
+
+		// Iterate through them adding their masses
+		for (auto* Actor : OverlappingActors)
+		{
+			// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Entered overlapping actors foreach loop")));
+			if ((Actor != nullptr) && (Actor != this))
+			{
+				TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+				FDamageEvent DamageEvent(ValidDamageTypeClass);
+
+				const float DamageAmount = 50.0f;
+				Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
+				GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Attack Hit")));
+			}
+		}
+	}
 }
 
 /// The Punch - Part 3

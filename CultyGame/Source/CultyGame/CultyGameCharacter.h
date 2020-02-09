@@ -193,6 +193,8 @@ public:
 	// AttackEnd - triggered when the player stops their attack
 	void AttackEnd();
 
+	void InflictDamage();
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();

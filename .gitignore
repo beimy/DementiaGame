@@ -100,3 +100,4 @@ Build/Android/res/*/*
 !Build/Android/res/*/*.png
 
 # End of https://www.gitignore.io/api/unrealengine
+CultyGame/Content/Levels/Levels/

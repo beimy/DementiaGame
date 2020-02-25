@@ -51,9 +51,9 @@ ACultyGameCharacter::ACultyGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
-	
+
 	// Load our animation montage on runtime
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeSwordAttackMontageObject(TEXT("AnimMontage'/Game/Mannequin/Montages/MeleeSwordAttackMontage2.MeleeSwordAttackMontage2'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MeleeSwordAttackMontageObject(TEXT("AnimMontage'/Game/Mannequin/Montages/MeleeSwordAttackMontage3.MeleeSwordAttackMontage3'"));
 	if (MeleeSwordAttackMontageObject.Succeeded()) // Null check
 	{
 		MeleeSwordAttackMontage = MeleeSwordAttackMontageObject.Object; // Retrieve the montage from the container object, i.e. get me the object of this thing I just loaded.
@@ -128,7 +128,7 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ACultyGameCharacter::OnResetVR);
 
-	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackInput); 
+	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &ACultyGameCharacter::AttackInput);
 	PlayerInputComponent->BindAction("MeleeAttack", IE_Released, this, &ACultyGameCharacter::AttackEnd);
 
 	// Interact input is setup within 'GameplayController'
@@ -151,12 +151,12 @@ void ACultyGameCharacter::OnResetVR()
 
 void ACultyGameCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		Jump();
+	Jump();
 }
 
 void ACultyGameCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		StopJumping();
+	StopJumping();
 }
 
 void ACultyGameCharacter::TurnAtRate(float Rate)
@@ -187,12 +187,12 @@ void ACultyGameCharacter::MoveForward(float Value)
 
 void ACultyGameCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
@@ -235,8 +235,8 @@ void ACultyGameCharacter::AttackInput()
 {
 	// Log(ELogLevel::INFO, __FUNCTION__);
 
-	// generate a random number between 1 and 3
-	int MontageSectionIndex = rand() % 3 + 1;
+	// generate a random number between 1 and 4
+	int MontageSectionIndex = rand() % 4 + 1;
 
 	// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
 	FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
@@ -245,7 +245,7 @@ void ACultyGameCharacter::AttackInput()
 }
 
 void ACultyGameCharacter::AttackStart()
-{	
+{
 	// Log(ELogLevel::INFO, __FUNCTION__);
 
 	// Enable colliders when animation starts.
@@ -258,7 +258,9 @@ void ACultyGameCharacter::AttackStart()
 	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
 	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
-	InflictDamage();
+	// On Begin Overlap Approach
+	// SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::InflictDamage);
+	//InflictDamage();
 }
 
 void ACultyGameCharacter::AttackEnd()
@@ -274,23 +276,21 @@ void ACultyGameCharacter::AttackEnd()
 
 	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
 	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+
+	// Clear array of all elements
+	DamagedActors.Empty();
 }
 
 void ACultyGameCharacter::InflictDamage()
 {
-	// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Inflict damage function has been called.")));
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController != nullptr)
 	{
-		// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Player controller isn't null.")));
 		// Find all the overlapping actors
 		TArray<AActor*> OverlappingActors;
+		TArray<AActor*> HitActors;
 
-		//TArray<AActor*> HitActors;
-
-		// SwordBaseCollisionBox->GetOverlappingActors(OUT OverlappingActors);
 		SwordMidCollisionBox->GetOverlappingActors(OUT OverlappingActors);
-		//SwordTipCollisionBox->GetOverlappingActors(OUT OverlappingActors);
 
 		if (SwordMidCollisionBox == nullptr)
 		{
@@ -301,16 +301,59 @@ void ACultyGameCharacter::InflictDamage()
 		// Iterate through them adding their masses
 		for (auto* Actor : OverlappingActors)
 		{
-			// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Entered overlapping actors foreach loop")));
-			if ((Actor != nullptr) && (Actor != this))
-			{
-				TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-				FDamageEvent DamageEvent(ValidDamageTypeClass);
+			auto CollisionType = Actor->FindComponentByClass<UPrimitiveComponent>()->GetCollisionObjectType();
+			GEngine->AddOnScreenDebugMessage(-5, 4.5f, FColor::Magenta, FString::Printf(TEXT("%s"), Actor));
 
-				const float DamageAmount = 50.0f;
-				Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
-				GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Attack Hit")));
+			if ((Actor != nullptr) && (Actor != this) /*&& (CollisionType == ECC_GameTraceChannel1)*/)
+			{
+				//GEngine->AddOnScreenDebugMessage(-5, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor isn't null and isn't Roy.")));
+
+				DamagedActors.AddUnique(Actor);
+				GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index"), DamagedActors[0]));
+
+				//Copy this for loop
+				for (int32 i = 0; i < DamagedActors.Num(); i++)
+				{
+					if (DamagedActors[i] == nullptr) { return; }
+
+					//Check if HitArray contains the Actor to deal damage.
+					if (!HitActors.Contains(Actor))
+					{
+						//Add Actor to the array
+						HitActors.AddUnique(Actor);
+
+						//Deal Damage to the Actor
+						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+						FDamageEvent DamageEvent(ValidDamageTypeClass);
+						const float DamageAmount = 20.0f;
+						Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
+					}
+
+					//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Attack Hit")));
+					GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index" + i), DamagedActors[i]));
+				}
 			}
+
+			/*
+			for (int32 i = 0; i < DamagedActors.Num(); i++)
+			{
+				if ((DamagedActors[i] == nullptr) || (DamagedActors[i] == Actor)) { return; }
+
+				else
+				{
+					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+					FDamageEvent DamageEvent(ValidDamageTypeClass);
+					const float DamageAmount = 20.0f;
+					Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
+
+					//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Attack Hit")));
+					GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index" + i), DamagedActors[i]));
+
+					// Actor has been damaged, add to array
+					// DamagedActors[i] = Actor;
+				}
+			}
+			*/
 		}
 	}
 }

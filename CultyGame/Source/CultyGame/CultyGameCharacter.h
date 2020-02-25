@@ -19,9 +19,9 @@
 
 /*
 	Stores all valid craft combinations, what items can we craft.
- 
+
 */
-USTRUCT(BlueprintType) 
+USTRUCT(BlueprintType)
 struct FCraftingInfo : public FTableRowBase // Inventory
 {
 
@@ -30,16 +30,16 @@ struct FCraftingInfo : public FTableRowBase // Inventory
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item that we need to use to create something.
-	FName ComponentID;
+		FName ComponentID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item created from components.
-	FName ProductID;
+		FName ProductID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item used to create something, thus destroy it after creation.
-	bool bDestroyComponentA;
+		bool bDestroyComponentA;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Item used to create something, thus destroy it after creation.
-	bool bDestroyComponentB; 
+		bool bDestroyComponentB;
 };
 
 
@@ -48,15 +48,15 @@ public:
 	Inherits from FTableRowBase, because we want to use this in a data table.
 	There are 2 types of items:
 	1. Pickups: When picked up, it's destroyed, and adds one of these FInventoryItem(s) to inventory.
-	2. 
+	2.
 */
-USTRUCT(BlueprintType) 
+USTRUCT(BlueprintType)
 struct FInventoryItem : public FTableRowBase // Inventory
 {
 
 	GENERATED_BODY()
 
-public: 
+public:
 
 	FInventoryItem()
 	{
@@ -67,40 +67,40 @@ public:
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName ItemID;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class APickup> ItemPickup; // Pickup, if you pick up an item, but then you drop it, we'll need to spawn it back into the world.
+		FName ItemID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Name;
+		TSubclassOf<class APickup> ItemPickup; // Pickup, if you pick up an item, but then you drop it, we'll need to spawn it back into the world.
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Action;
+		FText Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Value;
+		FText Action;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Scale;
+		int32 Value;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* Thumbnail;
+		FVector Scale;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Description;
+		UTexture2D* Thumbnail;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Stores all valid craft combinations for this item.
-	TArray<FCraftingInfo> CraftCombinations;
+		TArray<FCraftingInfo> CraftCombinations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanBeUsed;
+		bool bCanBeUsed;
 
 	/*
 		Overloading '==' operator.
 		By default we can't compare 2 inventory items, since C++ doesn't know how to compare inventory items.
 		e.g.
-		if(ItemA == ItemB) 
+		if(ItemA == ItemB)
 		So we're instructing C++ how to compare inventory items.
 		We need this because when we're removing from an inventory, and Unreal requires that we overload that data, otherwise the array cannot remove.
 		Whenever we wish to remove an item from the player's inventory we cannot unless we do this.
@@ -111,7 +111,7 @@ public:
 		{
 			return true;
 		}
-			
+
 		else
 		{
 			return false;
@@ -142,18 +142,18 @@ enum class EAttackType : uint8 {
 };
 
 
-UCLASS(config=Game)
+UCLASS(config = Game)
 class ACultyGameCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+		/** Camera boom positioning the camera behind the character */
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera;
 
 	// Melee Attack Montage Animation
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true")) // Allows us to bind our properties to a Blueprint
@@ -177,12 +177,12 @@ public:
 	virtual void BeginPlay() override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 
 	// AttackInput - triggers attack animations based on user input
 	void AttackInput();
@@ -195,6 +195,9 @@ public:
 
 	void InflictDamage();
 
+	TArray<AActor*> DamagedActors;
+	TArray<AActor*> HitActors;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -205,14 +208,14 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-	/** 
-	 * Called via input to turn at a given rate. 
+	/**
+	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void TurnAtRate(float Rate);
 
 	/**
-	 * Called via input to turn look up/down at a given rate. 
+	 * Called via input to turn look up/down at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookUpAtRate(float Rate);

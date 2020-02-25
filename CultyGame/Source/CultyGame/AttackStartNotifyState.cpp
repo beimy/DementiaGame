@@ -20,6 +20,20 @@ void UAttackStartNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAni
 	}
 }
 
+void UAttackStartNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime)
+{
+
+	if (MeshComp != NULL && MeshComp->GetOwner() != NULL)
+	{
+		ACultyGameCharacter* Player = Cast<ACultyGameCharacter>(MeshComp->GetOwner());
+		if (Player != NULL)
+		{
+			Player->InflictDamage();
+			//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Orange, __FUNCTION__);
+		}
+	}
+}
+
 void UAttackStartNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	// GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, __FUNCTION__);

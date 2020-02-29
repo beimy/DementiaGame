@@ -233,34 +233,44 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 
 void ACultyGameCharacter::AttackInput()
 {
-	// Log(ELogLevel::INFO, __FUNCTION__);
+	if (bIsSwinging == false)
+	{
+		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
 
-	// generate a random number between 1 and 4
-	int MontageSectionIndex = rand() % 4 + 1;
+		GetCharacterMovement()->MaxWalkSpeed = 200.0f; // Slow player movement at the start of attack until the attack is done.
 
-	// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
-	FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+		// Log(ELogLevel::INFO, __FUNCTION__);
 
-	PlayAnimMontage(MeleeSwordAttackMontage, 1.f, FName(*MontageSection));
+		// generate a random number between 1 and 4
+		int MontageSectionIndex = rand() % 4 + 1;
+
+		// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
+		FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+
+		PlayAnimMontage(MeleeSwordAttackMontage, 1.1f, FName(*MontageSection));
+	}
 }
 
 void ACultyGameCharacter::AttackStart()
 {
-	// Log(ELogLevel::INFO, __FUNCTION__);
+	if (bIsSwinging == true)
+	{
+		// Log(ELogLevel::INFO, __FUNCTION__);
 
-	// Enable colliders when animation starts.
-	SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
-	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		// Enable colliders when animation starts.
+		SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
+		SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
-	SwordMidCollisionBox->SetCollisionProfileName("Weapon");
-	SwordMidCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		SwordMidCollisionBox->SetCollisionProfileName("Weapon");
+		SwordMidCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
-	SwordTipCollisionBox->SetCollisionProfileName("Weapon");
-	SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		SwordTipCollisionBox->SetCollisionProfileName("Weapon");
+		SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
 
-	// On Begin Overlap Approach
-	// SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::InflictDamage);
-	//InflictDamage();
+		// On Begin Overlap Approach
+		// SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::InflictDamage);
+		//InflictDamage();
+	}
 }
 
 void ACultyGameCharacter::AttackEnd()
@@ -325,7 +335,7 @@ void ACultyGameCharacter::InflictDamage()
 						//Deal Damage to the Actor
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						const float DamageAmount = 20.0f;
+						const float DamageAmount = 5.0f;
 						Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
 					}
 

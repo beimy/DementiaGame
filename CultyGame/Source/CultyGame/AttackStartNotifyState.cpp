@@ -29,6 +29,7 @@ void UAttackStartNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnim
 		if (Player != NULL)
 		{
 			Player->InflictDamage();
+			Player->GetCharacterMovement()->MaxWalkSpeed = 200.0f; // Player attack is occuring, slow walk speed.
 			//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Orange, __FUNCTION__);
 		}
 	}
@@ -44,6 +45,8 @@ void UAttackStartNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 		if (Player != NULL)
 		{
 			Player->AttackEnd();
+			Player->bIsSwinging = false;
+			Player->GetCharacterMovement()->MaxWalkSpeed = 425.0f; // Player attack finished, return to normal walk speed.
 		}
 	}
 }

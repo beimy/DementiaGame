@@ -193,6 +193,9 @@ public:
 	// AttackEnd - triggered when the player stops their attack
 	void AttackEnd();
 
+	// bIsSwinging - check if player is currently in an attack animation
+	bool bIsSwinging;
+
 	void InflictDamage();
 
 	TArray<AActor*> DamagedActors;

@@ -60,6 +60,16 @@ ACultyGameCharacter::ACultyGameCharacter()
 		UE_LOG(LogTemp, VeryVerbose, TEXT("Animation Montage has been loaded successfully."));
 	}
 
+	// Load the sound cue object
+	static ConstructorHelpers::FObjectFinder<USoundCue> SwordGestureSoundCueObject(TEXT("SoundCue'/Game/Sounds/Cristian_Melee_SFX/SwordGestureSoundCue_1.SwordGestureSoundCue_1'"));
+	if (SwordGestureSoundCueObject.Succeeded()) // Null check
+	{
+		SwordGestureSoundCue = SwordGestureSoundCueObject.Object;
+		SwordAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("SwordAudioComponent"));
+		SwordAudioComponent->SetupAttachment(RootComponent);
+		UE_LOG(LogTemp, VeryVerbose, TEXT("Sound Cue has been loaded successfully."));
+	}
+
 	SwordBaseCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordBaseCollisionBox"));
 	SwordBaseCollisionBox->SetupAttachment(RootComponent);
 	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision"); // When collision boxes are initially available to the player character, we don't want anything to start colliding with them. We only want them to be colliding during the actual attack anim.
@@ -94,10 +104,10 @@ void ACultyGameCharacter::BeginPlay()
 	SwordMidCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordMid");
 	SwordTipCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordTip");
 
-	// OnComponentHit event provided by ...CollisionBox, pass in myself ('this'), and make sure MeleeAttackHit is triggered on myself ('this') object.
-	// SwordBaseCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
-	// SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
-	// SwordTipCollisionBox->OnComponentHit.AddDynamic(this, &UMeleeAttackSystem::MeleeAttackOnHit);
+	if (SwordAudioComponent && SwordGestureSoundCue)
+	{
+		SwordAudioComponent->SetSound(SwordGestureSoundCue);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

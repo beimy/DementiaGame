@@ -14,6 +14,7 @@
 #include "Animation/AnimMontage.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
+#include "Components/AudioComponent.h"
 #include "CultyGameCharacter.generated.h"
 
 
@@ -168,6 +169,10 @@ class ACultyGameCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true")) // Allows us to bind our properties to a Blueprint
 		UBoxComponent* SwordTipCollisionBox;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+		USoundCue* SwordGestureSoundCue;
+
+
 public:
 	ACultyGameCharacter();
 
@@ -243,6 +248,8 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 private:
+	UAudioComponent* SwordAudioComponent;
+
 	/**
 	* Log - prints a message to all the log outputs with a specific color
 	* @param LogLevel {@see ELogLevel} affects color of log

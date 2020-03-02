@@ -61,7 +61,7 @@ ACultyGameCharacter::ACultyGameCharacter()
 	}
 
 	// Load the sound cue object
-	static ConstructorHelpers::FObjectFinder<USoundCue> SwordGestureSoundCueObject(TEXT("SoundCue'/Game/Sounds/Cristian_Melee_SFX/SwordGestureSoundCue_1.SwordGestureSoundCue_1'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> SwordGestureSoundCueObject(TEXT("SoundCue'/Game/Sounds/RoySwordSwingSoundCue3.RoySwordSwingSoundCue3'"));
 	if (SwordGestureSoundCueObject.Succeeded()) // Null check
 	{
 		SwordGestureSoundCue = SwordGestureSoundCueObject.Object;
@@ -103,6 +103,10 @@ void ACultyGameCharacter::BeginPlay()
 	SwordBaseCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordBase");
 	SwordMidCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordMid");
 	SwordTipCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "SwordTip");
+
+	//SwordMidCollisionBox->OnComponentHit.AddDynamic(this, &ACultyGameCharacter::OnAttackHit);
+	//SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::OnAttackOverlapBegin);
+	//SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::OnAttackOverlapEnd);
 
 	if (SwordAudioComponent && SwordGestureSoundCue)
 	{
@@ -152,6 +156,7 @@ void ACultyGameCharacter::Tick(float DeltaTime)
 
 	CheckForInteractables();
 
+	//WorldTime = GetWorld()->GetTimeSeconds();
 }
 
 void ACultyGameCharacter::OnResetVR()
@@ -243,6 +248,7 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 
 void ACultyGameCharacter::AttackInput()
 {
+	// if ((EndOfAttack == 0.f) || (WorldTime - EndOfAttack <= AttackDelay))
 	if (bIsSwinging == false)
 	{
 		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
@@ -257,7 +263,7 @@ void ACultyGameCharacter::AttackInput()
 		// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
 		FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
 
-		PlayAnimMontage(MeleeSwordAttackMontage, 1.1f, FName(*MontageSection));
+		PlayAnimMontage(MeleeSwordAttackMontage, 1.0f, FName(*MontageSection));
 	}
 }
 
@@ -265,17 +271,26 @@ void ACultyGameCharacter::AttackStart()
 {
 	if (bIsSwinging == true)
 	{
+		if (SwordAudioComponent && !SwordAudioComponent->IsPlaying())
+		{
+			SwordAudioComponent->SetPitchMultiplier(FMath::RandRange(1.0f, 1.4f));
+			SwordAudioComponent->Play(0.f);
+		}
+
 		// Log(ELogLevel::INFO, __FUNCTION__);
 
 		// Enable colliders when animation starts.
 		SwordBaseCollisionBox->SetCollisionProfileName("Weapon");
 		SwordBaseCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		//SwordBaseCollisionBox->SetGenerateOverlapEvents(true); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 		SwordMidCollisionBox->SetCollisionProfileName("Weapon");
 		SwordMidCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		//SwordMidCollisionBox->SetGenerateOverlapEvents(true); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 		SwordTipCollisionBox->SetCollisionProfileName("Weapon");
 		SwordTipCollisionBox->SetNotifyRigidBodyCollision(true); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn on Hit Generation.
+		//SwordTipCollisionBox->SetGenerateOverlapEvents(true); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 		// On Begin Overlap Approach
 		// SwordMidCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ACultyGameCharacter::InflictDamage);
@@ -285,17 +300,22 @@ void ACultyGameCharacter::AttackStart()
 
 void ACultyGameCharacter::AttackEnd()
 {
+	//EndOfAttack = GetWorld()->GetTimeSeconds();
+
 	// Log(ELogLevel::INFO, __FUNCTION__);
 
 	// Disable colliders when animation ends.
 	SwordBaseCollisionBox->SetCollisionProfileName("NoCollision");
 	SwordBaseCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+	//SwordBaseCollisionBox->SetGenerateOverlapEvents(false); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 	SwordMidCollisionBox->SetCollisionProfileName("NoCollision");
 	SwordMidCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+	//SwordMidCollisionBox->SetGenerateOverlapEvents(false); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 	SwordTipCollisionBox->SetCollisionProfileName("NoCollision");
 	SwordTipCollisionBox->SetNotifyRigidBodyCollision(false); // Equivocal to Simulation Generates Hit Events boolean found in BPs, Turn off Hit Generation.
+	//SwordTipCollisionBox->SetGenerateOverlapEvents(false); // Equivocal to Generate Overlap Events boolean found in BPs.
 
 	// Clear array of all elements
 	DamagedActors.Empty();
@@ -314,7 +334,7 @@ void ACultyGameCharacter::InflictDamage()
 
 		if (SwordMidCollisionBox == nullptr)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Inflict Damage null check")));
+			//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Inflict Damage null check")));
 			return;
 		}
 
@@ -322,14 +342,14 @@ void ACultyGameCharacter::InflictDamage()
 		for (auto* Actor : OverlappingActors)
 		{
 			auto CollisionType = Actor->FindComponentByClass<UPrimitiveComponent>()->GetCollisionObjectType();
-			GEngine->AddOnScreenDebugMessage(-5, 4.5f, FColor::Magenta, FString::Printf(TEXT("%s"), Actor));
+			//GEngine->AddOnScreenDebugMessage(-5, 4.5f, FColor::Magenta, FString::Printf(TEXT("%s"), Actor));
 
 			if ((Actor != nullptr) && (Actor != this) /*&& (CollisionType == ECC_GameTraceChannel1)*/)
 			{
 				//GEngine->AddOnScreenDebugMessage(-5, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor isn't null and isn't Roy.")));
 
 				DamagedActors.AddUnique(Actor);
-				GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index"), DamagedActors[0]));
+				//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index"), DamagedActors[0]));
 
 				//Copy this for loop
 				for (int32 i = 0; i < DamagedActors.Num(); i++)
@@ -350,7 +370,7 @@ void ACultyGameCharacter::InflictDamage()
 					}
 
 					//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Attack Hit")));
-					GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index" + i), DamagedActors[i]));
+					//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("Actor %d at index" + i), DamagedActors[i]));
 				}
 			}
 
@@ -378,19 +398,33 @@ void ACultyGameCharacter::InflictDamage()
 	}
 }
 
-/// The Punch - Part 3
 /*
-void ACultyGameCharacter::AttackOnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ACultyGameCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//Log(ELogLevel::INFO, __FUNCTION__);
+	GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, FString::Printf(TEXT("OnAttackHit is being called")));
+	//Log(ELogLevel::WARNING, __FUNCTION__);
+	Log(ELogLevel::WARNING, Hit.GetActor()->GetName());
 
-	//Log(ELogLevel::INFO, Hit.GetActor()->GetName());
-
-	//UE_LOG(LogTemp, VeryVerbose, TEXT("testing hit"));
-	GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, __FUNCTION__);
+	if (SwordAudioComponent && SwordGestureSoundCue)
+	{
+		SwordAudioComponent->Play(0.f);
+	}
 }
 */
-/// The Punch - Part 3
+
+/*
+void ACultyGameCharacter::OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Log(ELogLevel::WARNING, __FUNCTION__);
+	//Log(ELogLevel::WARNING, OtherActor->GetName());
+}
+
+void ACultyGameCharacter::OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	Log(ELogLevel::WARNING, __FUNCTION__);
+	//Log(ELogLevel::WARNING, OtherActor->GetName());
+}
+*/
 
 void ACultyGameCharacter::Log(ELogLevel LogLevel, FString Message)
 {

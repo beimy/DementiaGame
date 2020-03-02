@@ -11,6 +11,7 @@
 #include "Components/InputComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Animation/AnimMontage.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
@@ -205,6 +206,24 @@ public:
 
 	TArray<AActor*> DamagedActors;
 	TArray<AActor*> HitActors;
+
+	// Triggered when the collision hit event fires between our weapon and enemy entities
+	//UFUNCTION()
+	//void OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	//float WorldTime;
+	//float EndOfAttack;
+	//float AttackDelay = 1.0f;
+
+	/*
+	// Triggered when the collider overlaps another component
+	UFUNCTION()
+	void OnAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	// Triggered when the collider stops overlapping with another component
+	UFUNCTION()
+	void OnAttackOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	*/
 
 protected:
 	/** Resets HMD orientation in VR. */

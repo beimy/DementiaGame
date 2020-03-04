@@ -14,7 +14,8 @@ ALight_Mook::ALight_Mook()
 	LOSMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("LineOfSightMesh"));
 	LOSMesh->bUseAsyncCooking = true;
 	LOSMesh->ContainsPhysicsTriMeshData(false);
-	LOSMesh->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true));
+	//LOSMesh->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true));
+	LOSMesh->SetupAttachment(RootComponent);
 
 		// Assign some default numeric values to avoid divide-by-zero problem
 		if (ArcAngle == 0)

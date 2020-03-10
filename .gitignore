@@ -101,3 +101,9 @@ Build/Android/res/*/*
 
 # End of https://www.gitignore.io/api/unrealengine
 CultyGame/Content/Levels/Levels/
+
+CultyGame/Content/Alberto/AI/Ai_2_YT/JesseBelle/AI_Summoned_LM1.uasset
+
+CultyGame/Content/Alberto/AI/Ai_2_YT/JesseBelle/MyLight_Mook_Summoned.uasset
+
+CultyGame/Content/Alberto/AI/Ai_2_YT/JesseBelle/LM_Summoned_BT.uasset

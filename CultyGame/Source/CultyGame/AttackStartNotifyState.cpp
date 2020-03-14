@@ -46,7 +46,7 @@ void UAttackStartNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 		{
 			Player->AttackEnd();
 			Player->bIsSwinging = false;
-			Player->GetCharacterMovement()->MaxWalkSpeed = 425.0f; // Player attack finished, return to normal walk speed.
+			// Player->GetCharacterMovement()->MaxWalkSpeed = 425.0f; // Player attack finished, return to normal walk speed.
 		}
 	}
 }

@@ -253,7 +253,7 @@ void ACultyGameCharacter::AttackInput()
 	{
 		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
 
-		GetCharacterMovement()->MaxWalkSpeed = 200.0f; // Slow player movement at the start of attack until the attack is done.
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
 
 		// Log(ELogLevel::INFO, __FUNCTION__);
 

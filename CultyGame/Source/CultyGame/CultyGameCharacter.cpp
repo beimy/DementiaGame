@@ -246,6 +246,18 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 
 }
 
+// Timer Tut
+void ACultyGameCharacter::TriggerDestroy()
+{
+	// After N seconds, once attack has finished.
+	// Set player movement back to normal.
+	// Set conditional? bIsSwinging?
+	
+	GetCharacterMovement()->MaxWalkSpeed = 425.0f;
+
+	// Could be called at AttackInput() or AttackEnd()
+}
+
 void ACultyGameCharacter::AttackInput()
 {
 	// if ((EndOfAttack == 0.f) || (WorldTime - EndOfAttack <= AttackDelay))
@@ -253,7 +265,11 @@ void ACultyGameCharacter::AttackInput()
 	{
 		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
 
-		GetCharacterMovement()->MaxWalkSpeed = 200.0f; // Slow player movement at the start of attack until the attack is done.
+		// Timer Tut
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
+
+		// Timer Tut
+		GetWorld()->GetTimerManager().SetTimer(TriggerDestroyTimerHandle, this, &ACultyGameCharacter::TriggerDestroy, 2.5f, true); // 1.f run every second, true loop is set to false.
 
 		// Log(ELogLevel::INFO, __FUNCTION__);
 

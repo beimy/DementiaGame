@@ -190,9 +190,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
+	/*
+	Any time we want to trigger a timer of sorts we're going to make reference to this handle.
+	The handle will be passed into our time manager and that in turn is going to have hooks
+	into our various methods. That will then trigger various events.
+
+	Calls method at end of life cycle
+	*/
+	FTimerHandle EnableWalkTimer; // Timer Tut
+
 	// Timer Tut
 	UFUNCTION()
-	void TriggerDestroy();
+	void EnableWalk();
 
 	// AttackInput - triggers attack animations based on user input
 	void AttackInput();
@@ -210,16 +219,6 @@ public:
 
 	TArray<AActor*> DamagedActors;
 	TArray<AActor*> HitActors;
-
-	/*
-		Any time we want to trigger a timer of sorts we're going to make reference to this handle. 
-		The handle will be passed into our time manager and that in turn is going to have hooks
-		into our various methods. That will then trigger various events.
-
-		Calls method at end of life cycle
-	*/
-	FTimerHandle TriggerDestroyTimerHandle; // Timer Tut
-
 
 	// Triggered when the collision hit event fires between our weapon and enemy entities
 	//UFUNCTION()
@@ -268,6 +267,9 @@ protected:
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
 	void CheckForInteractables(); // Inventory
+
+	void Crouching();
+	void UnCrouching();
 
 protected:
 	// APawn interface

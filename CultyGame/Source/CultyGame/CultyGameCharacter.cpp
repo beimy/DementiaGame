@@ -124,6 +124,9 @@ void ACultyGameCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ACultyGameCharacter::Crouching);
+	PlayerInputComponent->BindAction("Crouch", IE_Repeat, this, &ACultyGameCharacter::UnCrouching);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACultyGameCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACultyGameCharacter::MoveRight);
 
@@ -172,6 +175,16 @@ void ACultyGameCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Lo
 void ACultyGameCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	StopJumping();
+}
+
+void ACultyGameCharacter::Crouching()
+{
+	
+}
+
+void ACultyGameCharacter::UnCrouching()
+{
+	
 }
 
 void ACultyGameCharacter::TurnAtRate(float Rate)
@@ -246,6 +259,19 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 
 }
 
+// Timer Tut
+void ACultyGameCharacter::EnableWalk()
+{
+	// After N seconds, once attack has finished.
+	// Set player movement back to normal.
+	// Set conditional? bIsSwinging?
+	
+	GetCharacterMovement()->MaxWalkSpeed = 425.0f;
+	GetCharacterMovement()->SetJumpAllowed(true);
+
+	// Could be called at AttackInput() or AttackEnd()
+}
+
 void ACultyGameCharacter::AttackInput()
 {
 	// if ((EndOfAttack == 0.f) || (WorldTime - EndOfAttack <= AttackDelay))
@@ -253,7 +279,12 @@ void ACultyGameCharacter::AttackInput()
 	{
 		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
 
+		// Timer Tut
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
+		GetCharacterMovement()->SetJumpAllowed(false);
+
+		// Timer Tut
+		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.5f, true); // 1.f run every second, true loop is set to false.
 
 		// Log(ELogLevel::INFO, __FUNCTION__);
 

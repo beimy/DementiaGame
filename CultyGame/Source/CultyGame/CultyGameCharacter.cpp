@@ -61,7 +61,7 @@ ACultyGameCharacter::ACultyGameCharacter()
 	}
 
 	// Load the sound cue object
-	static ConstructorHelpers::FObjectFinder<USoundCue> SwordGestureSoundCueObject(TEXT("SoundCue'/Game/Sounds/RoySwordSwingSoundCue3.RoySwordSwingSoundCue3'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> SwordGestureSoundCueObject(TEXT("SoundCue'/Game/SFX/Melee_SFX/SwordGestureSoundCue_3.SwordGestureSoundCue_3'"));
 	if (SwordGestureSoundCueObject.Succeeded()) // Null check
 	{
 		SwordGestureSoundCue = SwordGestureSoundCueObject.Object;

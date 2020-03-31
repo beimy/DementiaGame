@@ -267,6 +267,7 @@ void ACultyGameCharacter::EnableWalk()
 	// Set conditional? bIsSwinging?
 	
 	GetCharacterMovement()->MaxWalkSpeed = 425.0f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
 	GetCharacterMovement()->SetJumpAllowed(true);
 
 	// Could be called at AttackInput() or AttackEnd()
@@ -281,6 +282,7 @@ void ACultyGameCharacter::AttackInput()
 
 		// Timer Tut
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
+		GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
 		GetCharacterMovement()->SetJumpAllowed(false);
 
 		// Timer Tut

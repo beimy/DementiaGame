@@ -270,6 +270,7 @@ protected:
 
 	void Crouching();
 	void UnCrouching();
+	void DisabledInput();
 
 protected:
 	// APawn interface

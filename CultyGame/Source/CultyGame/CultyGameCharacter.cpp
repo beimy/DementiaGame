@@ -187,6 +187,11 @@ void ACultyGameCharacter::UnCrouching()
 	
 }
 
+void ACultyGameCharacter::DisabledInput()
+{
+
+}
+
 void ACultyGameCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
@@ -262,6 +267,8 @@ void ACultyGameCharacter::CheckForInteractables() // Check for interactable time
 // Timer Tut
 void ACultyGameCharacter::EnableWalk()
 {
+	//class UInputComponent* PlayerInputComponent;
+
 	// After N seconds, once attack has finished.
 	// Set player movement back to normal.
 	// Set conditional? bIsSwinging?
@@ -269,7 +276,8 @@ void ACultyGameCharacter::EnableWalk()
 	GetCharacterMovement()->MaxWalkSpeed = 425.0f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
 	GetCharacterMovement()->SetJumpAllowed(true);
-
+	
+	//PlayerInputComponent->BindAction("CastSpell", IE_Pressed, this, &ACultyGameCharacter::DisabledInput);
 	// Could be called at AttackInput() or AttackEnd()
 }
 
@@ -278,12 +286,14 @@ void ACultyGameCharacter::AttackInput()
 	// if ((EndOfAttack == 0.f) || (WorldTime - EndOfAttack <= AttackDelay))
 	if (bIsSwinging == false)
 	{
+		//class UInputComponent* PlayerInputComponent;
 		bIsSwinging = true; // When the player presses the attack button/key 'V', set to 'true'. Set to 'false' on 'NotifyEnd()' in 'AttackStartNotifyState.cpp'
 
 		// Timer Tut
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
 		GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
 		GetCharacterMovement()->SetJumpAllowed(false);
+		//PlayerInputComponent->BindAction("CastSpell", IE_Pressed, this, &ACultyGameCharacter::DisabledInput);
 
 		// Timer Tut
 		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.5f, true); // 1.f run every second, true loop is set to false.

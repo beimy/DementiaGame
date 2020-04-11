@@ -44,7 +44,7 @@ void UAttackStartNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 		if (Player != NULL)
 		{
 			Player->AttackEnd();
-			Player->bIsSwinging = false;
+			//Player->bIsSwinging = false;
 		}
 	}
 }

@@ -276,7 +276,7 @@ void ACultyGameCharacter::EnableWalk()
 	GetCharacterMovement()->MaxWalkSpeed = 425.0f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
 	GetCharacterMovement()->SetJumpAllowed(true);
-	
+	bIsSwinging = false;
 	//PlayerInputComponent->BindAction("CastSpell", IE_Pressed, this, &ACultyGameCharacter::DisabledInput);
 	// Could be called at AttackInput() or AttackEnd()
 }
@@ -306,7 +306,7 @@ void ACultyGameCharacter::AttackInput()
 		// FString animation section, start_ is hard coded, and we just pass in the number generated above, thus "start_x", can be either "start_1" or "start_2"
 		FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
 
-		PlayAnimMontage(MeleeSwordAttackMontage, 1.0f, FName(*MontageSection));
+		PlayAnimMontage(MeleeSwordAttackMontage, 1.3f, FName(*MontageSection));
 	}
 }
 

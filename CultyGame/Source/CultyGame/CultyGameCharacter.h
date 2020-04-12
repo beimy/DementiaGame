@@ -213,6 +213,7 @@ public:
 	void AttackEnd();
 
 	// bIsSwinging - check if player is currently in an attack animation
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSwinging;
 
 	void InflictDamage();

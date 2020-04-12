@@ -291,7 +291,7 @@ void ACultyGameCharacter::AttackInput()
 		GetCharacterMovement()->SetJumpAllowed(false);
 
 		// Timer Tut
-		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.8f, true); // 1.f run every second, true loop is set to false.
+		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.1f, true); // 1.f run every second, true loop is set to false.
 
 		// Log(ELogLevel::INFO, __FUNCTION__);
 

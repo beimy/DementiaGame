@@ -403,7 +403,7 @@ void ACultyGameCharacter::InflictDamage()
 						//Deal Damage to the Actor
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						const float DamageAmount = 5.0f;
+						const float DamageAmount = 8.0f;
 						Actor->TakeDamage(DamageAmount, DamageEvent, PlayerController, this);
 					}
 

@@ -294,7 +294,7 @@ void ACultyGameCharacter::AttackInput()
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 0.0f); // ...at this rotation rate
 
 		// Timer Tut
-		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.1f, true); // 1.f run every second, true loop is set to false.
+		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 1.75f, true); // 1.f run every second, true loop is set to false.
 
 		// Log(ELogLevel::INFO, __FUNCTION__);
 

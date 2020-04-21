@@ -275,6 +275,7 @@ void ACultyGameCharacter::EnableWalk()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
 	GetCharacterMovement()->SetJumpAllowed(true);
 	bIsSwinging = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	// Could be called at AttackInput() or AttackEnd()
 }
 
@@ -289,6 +290,8 @@ void ACultyGameCharacter::AttackInput()
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f; // Slow player movement at the start of attack until the attack is done.
 		GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
 		GetCharacterMovement()->SetJumpAllowed(false);
+
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 0.0f); // ...at this rotation rate
 
 		// Timer Tut
 		GetWorld()->GetTimerManager().SetTimer(EnableWalkTimer, this, &ACultyGameCharacter::EnableWalk, 2.1f, true); // 1.f run every second, true loop is set to false.

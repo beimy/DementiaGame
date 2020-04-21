@@ -33,5 +33,5 @@ public:
 	FString Action;
 
 	UFUNCTION(BlueprintCallable, Category = "Pickup")
-	FString GetUseText() const { return FString::Printf(TEXT("%s : Press E to %s"), *Name, *Action); }
+	FString GetUseText() const { return FString::Printf(TEXT("%s : Press X to %s"), *Name, *Action); }
 };
